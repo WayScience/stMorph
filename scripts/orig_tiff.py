@@ -3,14 +3,14 @@ import tifffile as tiff
 import pandas as pd
 import os
 
-class orig_tiff:
+class OrigTiff:
 	def __init__(self, img, num_x, num_y):
 		'''Original tiff image. This class assumes the image was divided into equal crops along the x and y image axes for cell segmentation purposes.
 
 		inputs:
     	img -- str -- path to original tiff image
-    	num_x -- int -- number of segments along x-axis to divide image into
-    	num_y -- int -- number of segments along y-axis to divide image into'''
+    	num_x -- int -- number of tiles along x-axis to divide image into
+    	num_y -- int -- number of tiles along y-axis to divide image into'''
 		self.img = tiff.imread(img)
 		self.num_x = num_x
 		self.num_y = num_y
@@ -35,17 +35,14 @@ class orig_tiff:
 		xbounds, ybounds = self.get_bounds()
 		for i in range(1,self.num_x+1):
 			for j in range(1,self.num_y+1):
-				isExist = os.path.exists("%s/%i%i" % (output_dir, j, i))
-				if not isExist:
-					os.makedirs("%s/%i%i/image" % (output_dir, j, i))
 				crop = self.img[:, ybounds[j-1]:ybounds[j],xbounds[i-1]:xbounds[i]]
-				tiff.imwrite("%s/%i%i/image/image.tif" % (output_dir, j, i), crop, imagej=True)
+				tiff.imwrite("%s/%i%i.tif" % (output_dir, j, i), crop, imagej=True)
 
-	def get_dirs(self):
-		'''Returns list of directories of tiff crops, assuming self.crop_tif() was used to create directories'''
-		dirs = []
+	def get_tile_names(self):
+		'''Returns list of cropped tile fil enames, assuming self.crop_tif() was used to create tiles.'''
+		tiles = []
 		for i in range(1, self.num_x+1):
 			for j in range(1, self.num_y+1):
-				dirs.append("./%i%i" % (i,j))
-		return dirs
+				tiles.append("%i%i.tif" % (j,i))
+		return tiles
 
