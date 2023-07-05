@@ -1,0 +1,3 @@
+[submodule "CellSeg"]
+	path = CellSeg
+	url = https://github.com/olsonday/CellSeg
