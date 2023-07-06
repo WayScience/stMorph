@@ -40,7 +40,7 @@ class OrigTiff:
 				tiff.imwrite("%s/%i%i.tif" % (output_dir, j, i), crop, imagej=True)
 
 	def get_tile_names(self):
-		'''Returns list of cropped tile fil enames, assuming self.crop_tif() was used to create tiles.'''
+		'''Returns list of cropped tile file names, assuming self.crop_tif() was used to create tiles.'''
 		tiles = []
 		for i in range(1, self.num_x+1):
 			for j in range(1, self.num_y+1):
