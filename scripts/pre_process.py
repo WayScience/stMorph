@@ -15,7 +15,7 @@ def merge_coords():
 
 
 def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, idx: int, output_dir: str = "None") -> np.array:
-	'''Takes in multichannel img array and crops cell at specified center coordinates as an  individual image with a desired box size. Returns cropped image array.
+	'''Takes in multichannel image array and crops cell at the specified center coordinates as an individual image with a desired box size. Returns cropped image array.
 
 		inputs:
 		img -- array -- original image to crop
