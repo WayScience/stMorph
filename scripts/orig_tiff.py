@@ -31,7 +31,8 @@ class OrigTiff:
 		'''Crops the tiff into the specified number of segments, in order to use segmentation software without crashing. Creates new directory for each segment and writes segment to tif.
 
 		inputs:
-    	output_dir -- str -- output directory path for project (one up from desired tiff crop directories)'''
+    	output_dir -- str -- output directory path for project. Default = "." (saves one up from desired tiff crop directories)
+'''
 		xbounds, ybounds = self.get_bounds()
 		for i in range(1,self.num_x+1):
 			for j in range(1,self.num_y+1):
