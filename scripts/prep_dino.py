@@ -9,7 +9,9 @@ output_dir = "Output directory for cell segmentation and crops"
 numx = 4 #Number of tiles along x-axis of image
 numy = 2 #Number of tiles along y-axis of image
 channel_names = "Text file for image channel names"
+add_channels = True #Add empty channels to images
+num_channels = 2 #Adding 2 channels to 3 channel cell images to be compatible with pretraind scDINO 5 channel model
 
 run_cell_seg(img, output_dir, numx,numy,channel_names)
-prep_dino("/home/daynaolson/10x_prostate_run/Visium_FFPE_Human_Prostate_IF_image.tif","output/quantifications/image_statistics_growth2_uncomp.csv",4,2,2,"Absolute X", "Absolute Y", 50, "./cell_crops")
+prep_dino("/home/daynaolson/10x_prostate_run/Visium_FFPE_Human_Prostate_IF_image.tif","output/quantifications/image_statistics_growth2_uncomp.csv",4,2,2,"Absolute X", "Absolute Y", 50, "./cell_crops", add_channels, num_channels)
 
