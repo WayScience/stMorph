@@ -105,7 +105,7 @@ def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, id
 	return crop
 
 def img_to_cells(img: tiff, segs, box_size: int, output_dir: str):
-	'''Takes in pre-segmented multichannel, saves each cell as an individual image in tiff format of a specified box size, and returns list of cropped cell image arrays.
+	'''Takes in pre-segmented multichannel and saves each cell as an individual image in tiff format of a specified box size..
 
 		inputs:
 		img -- str -- path to original tiff image
@@ -115,15 +115,11 @@ def img_to_cells(img: tiff, segs, box_size: int, output_dir: str):
 	segs = np.load(segs)
 	segs = segs["coords"]
 	img = tiff.imread(img)
-	#cell_imgs = []
 	for i in range(segs.shape[1]):
 		crop_cell(img, segs[0,i], segs[1,i], box_size, i, output_dir)
-		#cell_imgs.append(cell)
-	#return cell_imgs
-	return
 
 def prep_dino(img:tiff, coord_dir, numx:int, numy:int, nuclei_channel:int, boxsize:int, output_dir: str):
-	'''Crops image to an image for each cell.
+	'''Crops tiff into single cell images for use in scDINO.
 
 	inputs:
 	img -- str -- path to tiff image
