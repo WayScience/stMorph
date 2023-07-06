@@ -80,13 +80,13 @@ def merge_coords(coord_dir, file_names, xbounds:float, ybounds:float, x_name:str
 def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, idx: int, output_dir: str = "None") -> np.array:
 	'''Takes in multichannel img array and crops cell at specified center coordinates as an  individual image with a desired box size. Returns cropped image array.
 
-		inputs:
-		img -- array -- original image to crop
-		x -- int or float -- x pixel of orginal image to center crop
-		y -- int or float -- y pixel of original image to center crop
-		box_size -- int -- dimension of a box_size x box_size image that crop will result in
-		idx -- int -- cell index for naming output image
-		output_dir -- str -- output directory path (optional-if set to none the image array will be returned but the .tif image will not be saved.'''
+	inputs:
+	img -- array -- original image to crop
+	x -- int or float -- x pixel of orginal image to center crop
+	y -- int or float -- y pixel of original image to center crop
+	box_size -- int -- dimension of a box_size x box_size image that crop will result in
+	idx -- int -- cell index for naming output image
+	output_dir -- str -- output directory path (optional-if set to none the image array will be returned but the .tif image will not be saved.'''
 	
 	#Get rectangle boundaries
 	x = np.round(x)
@@ -107,11 +107,11 @@ def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, id
 def img_to_cells(img: tiff, segs, box_size: int, output_dir: str):
 	'''Takes in pre-segmented multichannel and saves each cell as an individual image in tiff format of a specified box size..
 
-		inputs:
-		img -- str -- path to original tiff image
-		segs -- csv -- path to array (npz) that contains segmentation information (particular x and y centers for each cell under "coords")
-		box_size -- int -- desired image size for cell crops
-		output_dir -- str -- desired output directory path'''
+	inputs:
+	img -- str -- path to original tiff image
+	segs -- csv -- path to array (npz) that contains segmentation information (particular x and y centers for each cell under "coords")
+	box_size -- int -- desired image size for cell crops
+	output_dir -- str -- desired output directory path'''
 	segs = np.load(segs)
 	segs = segs["coords"]
 	img = tiff.imread(img)
