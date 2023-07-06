@@ -77,8 +77,9 @@ def merge_coords(coord_dir, file_names, xbounds:float, ybounds:float, x_name:str
 	return path
 
 
-def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, idx: int, output_dir: str = "None") -> np.array:
-	'''Takes in multichannel img array and crops cell at specified center coordinates as an  individual image with a desired box size. Returns cropped image array.
+def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, idx: int, output_dir: str = "None", add_channels=False, num_channels:int) -> np.array:
+	'''Takes in multichannel img array and crops cell at specified center coordinates as an  individual image with a desired box size. Returns cropped image array. 
+	Can add specified number of empty (zero-filled) image channels to be compatible with pre-trained multi-channel vision transformer models.
 
 	inputs:
 	img -- array -- original image to crop
@@ -86,8 +87,9 @@ def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, id
 	y -- int or float -- y pixel of original image to center crop
 	box_size -- int -- dimension of a box_size x box_size image that crop will result in
 	idx -- int -- cell index for naming output image
-	output_dir -- str -- output directory path (optional-if set to none the image array will be returned but the .tif image will not be saved.'''
-	
+	output_dir -- str -- output directory path (optional-if set to none the image array will be returned but the .tif image will not be saved.
+	add_channels -- bool -- If true, adds num_channel number of zero-filled channels to image. 
+	num_channels -- int -- Number of zero-filled channels to add to image. '''
 	#Get rectangle boundaries
 	x = np.round(x)
 	y = np.round(y)
@@ -99,27 +101,34 @@ def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, id
 
 	# crop the image at the bounds
 	crop = img[:,ymin:ymax, xmin:xmax]
-
+	if add_channels == True:
+		zeros = np.zeros((num_channels, box_size, box_size))
+		crop = np.concatenate((crop, zeros))
 	if output_dir != "None":
 		tiff.imwrite("%s/cell_%i.tif" % (output_dir, idx), crop, imagej=True)
 	return crop
 
-def img_to_cells(img: tiff, segs, box_size: int, output_dir: str):
-	'''Takes in pre-segmented multichannel and saves each cell as an individual image in tiff format of a specified box size..
+def img_to_cells(img: tiff, segs, box_size: int, output_dir: str, add_channels=False, num_channels:int):
+	'''Takes in pre-segmented multichannel and saves each cell as an individual image in tiff format of a specified box size.
+	Can add specified number of empty (zero-filled) image channels to be compatible with pre-trained multi-channel vision transformer models.
 
 	inputs:
 	img -- str -- path to original tiff image
 	segs -- csv -- path to array (npz) that contains segmentation information (particular x and y centers for each cell under "coords")
 	box_size -- int -- desired image size for cell crops
-	output_dir -- str -- desired output directory path'''
+	output_dir -- str -- desired output directory path
+	add_channels -- bool -- If true, adds num_channel number of zero-filled channels to image. 
+	num_channels -- int -- Number of zero-filled channels to add to image. '''
 	segs = np.load(segs)
 	segs = segs["coords"]
 	img = tiff.imread(img)
 	for i in range(segs.shape[1]):
-		crop_cell(img, segs[0,i], segs[1,i], box_size, i, output_dir)
+		crop_cell(img, segs[0,i], segs[1,i], box_size, i, output_dir, add_channels, num_channels)
 
-def prep_dino(img:tiff, coord_dir, numx:int, numy:int, nuclei_channel:int, boxsize:int, output_dir: str):
+def prep_dino(img:tiff, coord_dir, numx:int, numy:int, nuclei_channel:int, boxsize:int, output_dir: str, add_channels=False, num_channels:int):
 	'''Crops tiff into single cell images for use in scDINO.
+	Can add specified number of empty (zero-filled) image channels to be compatible with pre-trained scDINO 5 channel model.
+
 
 	inputs:
 	img -- str -- path to tiff image
@@ -129,11 +138,13 @@ def prep_dino(img:tiff, coord_dir, numx:int, numy:int, nuclei_channel:int, boxsi
 	nuclei_channel -- int -- image channel that includes nuclei staining
 	boxsize -- int -- desired boxsize x boxsize size of cropped cell images
 	output_dir -- str -- path to output directory for cell crops
-	'''
+	add_channels -- bool -- If true, adds num_channel number of zero-filled channels to image. 
+	num_channels -- int -- Number of zero-filled channels to add to image.'''
+
 
 	tif = OrigTiff(img,numx,numy, nuclei_channel)
 	xbounds, ybounds = tif.get_bounds()
 	files = tif.get_tile_names()
 	coords = merge_coords(coord_dir, files,  xbounds, ybounds, "Absolute X", "Absolute Y", output_dir)
-	img_to_cells(img, coords, boxsize, output_dir)
+	img_to_cells(img, coords, boxsize, output_dir, add_channels, num_channels)
 
