@@ -3,7 +3,7 @@ meta:
   output_dir: "output_dir"
   dataset_dir: "dir_imgs" #Path to directory that contains single cell cropped 5 channel images.
   folder_depth_for_labels: 0 # 0 is the folder where the images are, 1 is the folder above, etc.
-  test_datasetsplit_fraction: 0.1
+  test_datasetsplit_fraction: 1.0
   seed: 40 #should match scDINO seed if you want to use the same train/test split
   images_are_RGB: False
   channel_dict: { 0: "Iba", 1: "Vimentin", 2: "DAPI", 3: "Blank1", 4: "Blank2"} #do not use underscore or slash in channel name
