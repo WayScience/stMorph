@@ -41,7 +41,7 @@ class OrigTiff:
 				crop = self.img[:, ybounds[j-1]:ybounds[j],xbounds[i-1]:xbounds[i]]
 				tiff.imwrite("%s/%i%i/image/image.tif" % (output_dir, j, i), crop, imagej=True)
 
-def get_tile_names(self):
+	def get_tile_names(self):
 		'''Returns list of directories of tiff crops, assuming self.crop_tif() was used to create directories'''
 		'''Returns list of cropped tile fil enames, assuming self.crop_tif() was used to create tiles.'''
 		dirs = []
