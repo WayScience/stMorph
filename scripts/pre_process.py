@@ -28,7 +28,8 @@ def cell_seg_prep(img:tiff, output_dir, numx:int,numy:int,channel_names):
 
 	tif = OrigTiff(img,numx,numy)
 	tif.crop_tif("%s/tiles" % output_dir)
-	shutil.copyfile(channel_names, "%s/channelNames.txt" % output_dir)
+	if not os.path.exists("%s/channelNames.txt" % output_dir):
+		shutil.copyfile(channel_names, "%s/channelNames.txt" % output_dir)
 	target = output_dir
 	return target
 
@@ -45,12 +46,12 @@ def run_cell_seg(img:tiff, output_dir, numx:int,numy:int,channel_names):
 	target = cell_seg_prep(img,output_dir,numx,numy,channel_names)
 	main.main(target)
 
-def merge_coords(coord_dir, file_names, xbounds:float, ybounds:float, x_name:str, y_name:str, output_dir: str):
+def merge_coords(coord_dir, tile_names, xbounds:float, ybounds:float, x_name:str, y_name:str, output_dir: str):
 	'''Converts CellSeg-segmetned tile cell center coordinates to coordinates in original image. Returns path to csv that contains cell coordiantes for the entire image.
 
 	inputs:
 	coord_dir -- str -- path to directory that contains CellSeg coordinate output files.
-	files_names -- list of str -- list of coordinate file names, using the OrigTiff tile naming convention
+	tile_names -- list of str -- list of image tile names, using the OrigTiff tile naming convention
 	xbounds -- list of float-- list of pixel x values for tile boundaries in terms of the entire image
 	ybounds -- list of float -- list of pixel y values for tile boundaries in terms of the entire image
 	x_name -- name of column in the coordinate file that contains cell center x coordinates in terms of the individual tile
@@ -61,8 +62,8 @@ def merge_coords(coord_dir, file_names, xbounds:float, ybounds:float, x_name:str
 		os.makedirs(output_dir)
 	X = []
 	Y = []
-	for name in files:
-		data = pd.read_csv("%s/%s__statistics_growth2_uncomp.csv" % (coord_dir, file_name), usecols=[x_name,y_name])
+	for name in tile_names:
+		data = pd.read_csv("%s/%s__statistics_growth2_uncomp.csv" % (coord_dir, name), usecols=[x_name,y_name])
 		x_offset = xbounds[int(name[3]-1)]
 		y_offset = ybounds[int(name[2]-1)]
 		x = np.array(data[x_name]) + x_offset
@@ -77,17 +78,19 @@ def merge_coords(coord_dir, file_names, xbounds:float, ybounds:float, x_name:str
 	return path
 
 
-def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, idx: int, output_dir: str = "None") -> np.array:
-	'''Takes in multichannel img array and crops cell at specified center coordinates as an  individual image with a desired box size. Returns cropped image array.
+def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, idx: int, num_channels:int, output_dir: str = "None",  add_channels=False) -> np.array:
+	'''Takes in multichannel img array and crops cell at specified center coordinates as an  individual image with a desired box size. Returns cropped image array. 
+	Can add specified number of empty (zero-filled) image channels to be compatible with pre-trained multi-channel vision transformer models.
 
-		inputs:
-		img -- array -- original image to crop
-		x -- int or float -- x pixel of orginal image to center crop
-		y -- int or float -- y pixel of original image to center crop
-		box_size -- int -- dimension of a box_size x box_size image that crop will result in
-		idx -- int -- cell index for naming output image
-		output_dir -- str -- output directory path (optional-if set to none the image array will be returned but the .tif image will not be saved.'''
-	
+	inputs:
+	img -- array -- original image to crop
+	x -- int or float -- x pixel of orginal image to center crop
+	y -- int or float -- y pixel of original image to center crop
+	box_size -- int -- dimension of a box_size x box_size image that crop will result in
+	idx -- int -- cell index for naming output image
+	output_dir -- str -- output directory path (optional-if set to none the image array will be returned but the .tif image will not be saved.
+	add_channels -- bool -- If true, adds num_channel number of zero-filled channels to image. 
+	num_channels -- int -- Number of zero-filled channels to add to image. '''
 	#Get rectangle boundaries
 	x = np.round(x)
 	y = np.round(y)
@@ -99,27 +102,34 @@ def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, id
 
 	# crop the image at the bounds
 	crop = img[:,ymin:ymax, xmin:xmax]
-
+	if add_channels == True:
+		zeros = np.zeros((num_channels, box_size, box_size))
+		crop = np.concatenate((crop, zeros))
 	if output_dir != "None":
-		tiff.imwrite("%s/cell_%i.tif" % (output_dir, idx), crop, imagej=True)
+		tiff.imwrite("%s/cell_%i.tif" % (output_dir, idx), crop.astype('float32'), imagej=True)
 	return crop
 
-def img_to_cells(img: tiff, segs, box_size: int, output_dir: str):
-	'''Takes in pre-segmented multichannel and saves each cell as an individual image in tiff format of a specified box size..
+def img_to_cells(img: tiff, segs, box_size: int, output_dir: str, num_channels:int,add_channels=False):
+	'''Takes in pre-segmented multichannel and saves each cell as an individual image in tiff format of a specified box size.
+	Can add specified number of empty (zero-filled) image channels to be compatible with pre-trained multi-channel vision transformer models.
 
-		inputs:
-		img -- str -- path to original tiff image
-		segs -- csv -- path to array (npz) that contains segmentation information (particular x and y centers for each cell under "coords")
-		box_size -- int -- desired image size for cell crops
-		output_dir -- str -- desired output directory path'''
+	inputs:
+	img -- str -- path to original tiff image
+	segs -- csv -- path to array (npz) that contains segmentation information (particular x and y centers for each cell under "coords")
+	box_size -- int -- desired image size for cell crops
+	output_dir -- str -- desired output directory path
+	add_channels -- bool -- If true, adds num_channel number of zero-filled channels to image. 
+	num_channels -- int -- Number of zero-filled channels to add to image. '''
 	segs = np.load(segs)
 	segs = segs["coords"]
 	img = tiff.imread(img)
 	for i in range(segs.shape[1]):
-		crop_cell(img, segs[0,i], segs[1,i], box_size, i, output_dir)
+		crop_cell(img, segs[0,i], segs[1,i], box_size, i, num_channels, output_dir, add_channels)
 
-def prep_dino(img:tiff, coord_dir, numx:int, numy:int, nuclei_channel:int, boxsize:int, output_dir: str):
+def prep_dino(img:tiff, coord_dir, numx:int, numy:int, nuclei_channel:int, boxsize:int, output_dir: str, num_channels:int, add_channels=False):
 	'''Crops tiff into single cell images for use in scDINO.
+	Can add specified number of empty (zero-filled) image channels to be compatible with pre-trained scDINO 5 channel model.
+
 
 	inputs:
 	img -- str -- path to tiff image
@@ -129,11 +139,16 @@ def prep_dino(img:tiff, coord_dir, numx:int, numy:int, nuclei_channel:int, boxsi
 	nuclei_channel -- int -- image channel that includes nuclei staining
 	boxsize -- int -- desired boxsize x boxsize size of cropped cell images
 	output_dir -- str -- path to output directory for cell crops
-	'''
+	add_channels -- bool -- If true, adds num_channel number of zero-filled channels to image. 
+	num_channels -- int -- Number of zero-filled channels to add to image.'''
+	
+	isExist = os.path.exists(output_dir)
+	if not isExist:
+		os.makedirs(output_dir)
 
-	tif = OrigTiff(img,numx,numy, nuclei_channel)
+	tif = OrigTiff(img,numx,numy)
 	xbounds, ybounds = tif.get_bounds()
 	files = tif.get_tile_names()
 	coords = merge_coords(coord_dir, files,  xbounds, ybounds, "Absolute X", "Absolute Y", output_dir)
-	img_to_cells(img, coords, boxsize, output_dir)
+	img_to_cells(img, coords, boxsize, output_dir, num_channels, add_channels)
 

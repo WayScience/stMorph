@@ -28,29 +28,21 @@ class OrigTiff:
 		return(xbounds, ybounds)
 
 	def crop_tif(self, output_dir: str = "."):
-		'''Crops the tiff into the specified number of segments, in order to use segmentation software without crashing. Creates new directory for each segment and writes segment to tif.
+		'''Crops the tiff into the specified number of tiles, in order to use segmentation software without crashing. writes each tile to tif in output_dir.
 
 		inputs:
     	output_dir -- str -- output directory path for project (one up from desired tiff crop directories)'''
 		xbounds, ybounds = self.get_bounds()
 		for i in range(1,self.num_x+1):
 			for j in range(1,self.num_y+1):
-				isExist = os.path.exists("%s/%i%i" % (output_dir, j, i))
-				if not isExist:
-					os.makedirs("%s/%i%i/image" % (output_dir, j, i))
 				crop = self.img[:, ybounds[j-1]:ybounds[j],xbounds[i-1]:xbounds[i]]
-				tiff.imwrite("%s/%i%i/image/image.tif" % (output_dir, j, i), crop, imagej=True)
+				tiff.imwrite("%s/%i%i.tif" % (output_dir, j, i), crop, imagej=True)
 
 	def get_tile_names(self):
-		'''Returns list of directories of tiff crops, assuming self.crop_tif() was used to create directories'''
-		'''Returns list of cropped tile fil enames, assuming self.crop_tif() was used to create tiles.'''
+		'''Returns list of cropped tile names, assuming self.crop_tif() was used to create tiles.'''
 		dirs = []
 		tiles = []
 		for i in range(1, self.num_x+1):
-		for i in range(1, self.num_x+1):
 			for j in range(1, self.num_y+1):
-			for j in range(1, self.num_y+1):
-				dirs.append("./%i%i" % (i,j))
-				tiles.append("%i%i.tif" % (j,i))
-		return dirs
+				tiles.append("%i%i" % (j,i))
 		return tiles
