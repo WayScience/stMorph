@@ -16,7 +16,10 @@ class OrigTiff:
 		self.num_y = num_y
 
 	def get_bounds(self):
-		'''Returns bounds for each crop in reference to the original image, assuming division was done equally along each axis.'''
+		'''Returns bounds for each tile in reference to the original image, assuming division was done equally along each axis.
+		
+		returns:
+		xbounds, ybounds -- list -- lists of tile bounds on x-axis and y-axis'''
 		xbounds = []
 		ybounds = []
 		for i in range(self.num_x):
@@ -39,7 +42,10 @@ class OrigTiff:
 				tiff.imwrite("%s/%i%i.tif" % (output_dir, j, i), crop, imagej=True)
 
 	def get_tile_names(self):
-		'''Returns list of cropped tile names, assuming self.crop_tif() was used to create tiles.'''
+		'''Returns list of cropped tile names, assuming self.crop_tif() was used to create tiles.
+		
+		returns:
+		tiles -- list -- list of tile name prefixes based on their grid location (indexing starts at 1)'''
 		dirs = []
 		tiles = []
 		for i in range(1, self.num_x+1):

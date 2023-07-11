@@ -1,12 +1,13 @@
-import numpy as np
-import tifffile as tiff
-import pandas as pd
 import os
-from orig_tiff import OrigTiff
-import shutil
 import sys
+import numpy as np
+import pandas as pd
+import tifffile as tiff
+import shutil
+from orig_tiff import OrigTiff
 sys.path.append('CellSeg')
 from CellSeg import main
+
 
 def cell_seg_prep(img:tiff, output_dir, numx:int,numy:int,channel_names):
 	'''Prepares image for CellSeg including tiling. Returns output_dir path that includes tiles and output subfolders.
@@ -16,7 +17,10 @@ def cell_seg_prep(img:tiff, output_dir, numx:int,numy:int,channel_names):
 	output_dir -- str -- path to directory one up of desired tiles and CellSeg output directories.
 	numx -- int -- number of tiles to divide image into on x-axis
 	numy -- number of tiles to divide image into on y-axis (for example, if numx=4 and numy=2 the image will be cropped into tiles by a 4x2 grid)
-	channel_names -- str -- path to text file that includes each image channel name as a line in order'''
+	channel_names -- str -- path to text file that includes each image channel name as a line in order
+	
+	returns:
+	target -- str -- path to project directory'''
 
 
 	if not os.path.exists(output_dir):
@@ -56,7 +60,10 @@ def merge_coords(coord_dir, tile_names, xbounds:float, ybounds:float, x_name:str
 	ybounds -- list of float -- list of pixel y values for tile boundaries in terms of the entire image
 	x_name -- name of column in the coordinate file that contains cell center x coordinates in terms of the individual tile
 	y_name -- name of column in the coordinate file that contains cell center y coordinates in terms of the individual tile
-	output_dir -- str -- path to directory to output full coordinate file'''
+	output_dir -- str -- path to directory to output full coordinate file'
+	
+	returns:
+	path -- str -- path to file with all cell coordinates'''
 	isExist = os.path.exists(output_dir)
 	if not isExist:
 		os.makedirs(output_dir)
@@ -90,7 +97,10 @@ def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, id
 	idx -- int -- cell index for naming output image
 	output_dir -- str -- output directory path (optional-if set to none the image array will be returned but the .tif image will not be saved.
 	add_channels -- bool -- If true, adds num_channel number of zero-filled channels to image. 
-	num_channels -- int -- Number of zero-filled channels to add to image. '''
+	num_channels -- int -- Number of zero-filled channels to add to image. 
+	
+	returns: 
+	crop -- np array -- cropped image array for single cell'''
 	#Get rectangle boundaries
 	x = np.round(x)
 	y = np.round(y)

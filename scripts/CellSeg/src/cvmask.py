@@ -52,7 +52,7 @@ class CVMask():
         if (index >= width):
             up = self.update_adjacency_value(adjacency_matrix, origin_mask, plane_mask_flattened[index-width])
         if (index <= len(plane_mask_flattened) - 1 - width):
-            down = self.update_adjacency_value(adjacency_matrix, origin_mask, plane_mask_flattened[index+width+1])
+            down = self.update_adjacency_value(adjacency_matrix, origin_mask, plane_mask_flattened[index+width])
         
         if (left or right or up or down):
             adjacency_matrix[int(origin_mask - 1), int(origin_mask-1)] += 1
@@ -60,7 +60,7 @@ class CVMask():
     def compute_channel_means_sums_compensated(self, image):
         height, width, n_channels = image.shape
         mask_height, mask_width = self.flatmasks.shape
-        n_masks = len(np.unique(self.flatmasks)) 
+        n_masks = len(np.unique(self.flatmasks)) - 1
         channel_sums = np.zeros((n_masks, n_channels))
         channel_counts = np.zeros((n_masks, n_channels))
         if n_masks == 0:
