@@ -85,6 +85,10 @@ def merge_coords(coord_dir, tile_names, xbounds:float, ybounds:float, x_name:str
 	return path
 
 
+
+def run_cell_seg(img:tiff, output_dir, numx:int,numy:int,channel_names):
+	'''Prepares image for CellSeg and runs CellSeg using the submodule.
+
 def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, idx: int, num_channels:int, output_dir: str = "None",  add_channels=False) -> np.array:
 	'''Takes in multichannel img array and crops cell at specified center coordinates as an  individual image with a desired box size. Returns cropped image array. 
 	Can add specified number of empty (zero-filled) image channels to be compatible with pre-trained multi-channel vision transformer models.
@@ -101,6 +105,7 @@ def crop_cell(img: np.array, x: int or float, y: int or float, box_size: int, id
 	
 	returns: 
 	crop -- np array -- cropped image array for single cell'''
+
 	#Get rectangle boundaries
 	x = np.round(x)
 	y = np.round(y)
