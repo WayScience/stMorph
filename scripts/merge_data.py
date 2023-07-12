@@ -88,22 +88,30 @@ def assign_spot_feats(coords_with_spot, cls, exp, spots):
 	for spot in range(spots.shape[0]):
 		cls_feats = []
 		list = coords_with_spot[coords_with_spot['spot'] == spot].iloc[:,0].tolist()
-		for idx in list:
-			cls_feats.append(cls[idx,:])
-		all_cls.append(cls_feats)
-		mean_cls.append(np.mean(cls_feats, axis=0))
+		if len(list) > 0:
+			for idx in list:
+				cls_feats.append(cls[idx,:])
+			all_cls.append(cls_feats)
+			mean_cls.append(np.mean(cls_feats, axis=0).tolist())
+		else:
+			feats = np.empty((384))
+			feats[:] = np.nan
+			all_cls.append(feats)
+			mean_cls.append(feats)
+	mean_cls = pd.DataFrame(np.array(mean_cls))
+	mean_cls = mean_cls.add_prefix("i")
 	spots["CLS"]=all_cls
-	spots["CLS Norm"] = mean_cls
 	print("CLS added")
-
+	
 	#Add ST gene expression to spots
 	exp_df = pd.DataFrame(exp.T)
+	exp_df = exp_df.add_prefix("e")
 	print("Gene expression added")
 
-	spot_feats = pd.concat([spots,exp_df], axis=1)
+	spot_feats = pd.concat([spots,mean_cls, exp_df], axis=1)
 	return spot_feats
 
-#spots = load_spots(tissue_positions)
-#coords_with_spot = assign_cell_to_spot(spots,coords, output_dir)
-#spot_feats = assign_spot_feats(coords_with_spot,cls, exp, spots)
-#spot_feats.to_csv("%s/spot_feats.csv" % output_dir)
+spots = load_spots(tissue_positions)
+coords_with_spot = assign_cell_to_spot(spots,coords, output_dir)
+spot_feats = assign_spot_feats(coords_with_spot,cls, exp, spots)
+spot_feats.to_csv("%s/spot_feats.csv" % output_dir)
