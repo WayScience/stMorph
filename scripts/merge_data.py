@@ -111,7 +111,7 @@ def assign_spot_feats(coords_with_spot, cls, exp, spots):
 	spot_feats = pd.concat([spots,mean_cls, exp_df], axis=1)
 	return spot_feats
 
-spots = load_spots(tissue_positions)
-coords_with_spot = assign_cell_to_spot(spots,coords, output_dir)
-spot_feats = assign_spot_feats(coords_with_spot,cls, exp, spots)
+spots = load_spots(tissue_positions) #load spots into dataframe with x,y vals for in-tissue spots
+coords_with_spot = assign_cell_to_spot(spots,coords, output_dir) #assigns each set of cell coords to spot
+spot_feats = assign_spot_feats(coords_with_spot,cls, exp, spots) #adds CLS and gene exp features to spots
 spot_feats.to_csv("%s/spot_feats.csv" % output_dir)
