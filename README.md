@@ -40,7 +40,9 @@ merge_data.py integrates CLS tokens outputed by scDINO with gene expression data
 <br>
 
 # Results
-Results of clusterering CLS Tokens + Gene Expression at the spot level for 10X Prostate Cancer Example (cluster.py). Gene expression preprocessing, UMAP, and leiden clustering performed by scanpy. Clusters plotted by UMAP values (left) and tissue image pixel coordinate values (right).
+Results of clusterering CLS tokens and gene expression at the spot level for 10X Prostate Cancer Example (cluster.py). Gene expression preprocessing, UMAP, and leiden clustering performed by scanpy. Clusters plotted by UMAP values (top) and tissue image pixel coordinate values (bottom).
+
+<br>
 
 ![results](imgs/cluster_results.png)
 
